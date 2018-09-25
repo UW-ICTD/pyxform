@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: pyxform-medic
-Version: 0.9.27
+Version: 0.9.28
 Summary: A Python package to create XForms for ODK Collect.
 Home-page: http://pypi.python.org/pypi/pyxform/
 Author: github.com/xlsform

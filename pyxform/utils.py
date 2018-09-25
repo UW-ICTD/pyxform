@@ -69,7 +69,6 @@ def node(*args, **kwargs):
     kwargs -- attributes
     returns a xml.dom.minidom.Element
     """
-    blocked_attributes = ['tag']
     tag = args[0] if len(args) > 0 else kwargs['tag']
     args = args[1:]
     result = DetachableElement(tag)
@@ -79,8 +78,6 @@ def node(*args, **kwargs):
     # kwargs is an xml attribute dictionary,
     # here we convert it to a xml.dom.minidom.Element
     for k, v in iter(kwargs.items()):
-        if k in blocked_attributes:
-            continue
         if k == 'toParseString':
             if v is True and len(unicode_args) == 1:
                 parsed_string = True
