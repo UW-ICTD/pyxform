@@ -2,41 +2,67 @@
 pyxform v0.9
 ============
 
+.. image:: https://travis-ci.org/XLSForm/pyxform.svg?branch=master
+    :target: https://travis-ci.org/XLSForm/pyxform
+
 pyxform is a Python library that makes writing XForms for ODK Collect and enketo
-easy by converting XLS(X) spreadsheets into XForms. A new user of pyxform should
-look at the documentation `here <https://formhub.org/syntax/>`_ or
-`here <http://opendatakit.org/help/form-design/xlsform/>`_.
+easy by converting XLS(X) spreadsheets into XForms. It is used as a library in a number of tools including `the ODK online converter <http://opendatakit.org/xiframe/>`_ and `Ona <https://ona.io>`_.
 
-pyxform is used by `opendatakit.org <http://opendatakit.org>`_ and by `formhub.org <http://formhub.org>`_.
-
-* opendatakit.org uses the repo here:
-https://github.com/uw-ictd/pyxform
+XLS(X) documents used as input must follow to the `XLSForm standard <http://xlsform.org/>`_ and the resulting output follows the `ODK XForms <https://github.com/opendatakit/xforms-spec>`_ standard. 
 
 * formhub.org uses the repo here:
 https://github.com/modilabs/pyxform
 
-pyxform is a major rewrite of `xls2xform <http://github.com/mvpdev/xls2xform/>`_. 
+pyxform is a major rewrite of `xls2xform <http://github.com/mvpdev/xls2xform/>`_.
 
-Running pyxform as a Python script:
-===========================
+Running the latest release of pyxform
+=====================================
+For those who want to convert forms at the command line, the latest official release of pyxform can be installed using `pip <https://en.wikipedia.org/wiki/Pip_(package_manager)>`_::
+    
+    pip install pyxform
 
-1. install xlrd.
+The ``xls2xform`` command can then be used::
 
-    #On ubuntu these terminal commands should do it:
+    xls2xform path_to_XLSForm output_path
 
-    easy_install pip
+Running pyxform from local source
+=================================
 
-    pip install xlrd
+Note that you must uninstall any globally installed ``pyxform`` instance in order to use local modules.
 
-2. Run this command:
+From the command line::
 
+    python setup.py develop
     python pyxform/xls2xform.py path_to_XLSForm output_path
 
-Installation
-============
-Installing pyxform from github is easy with pip::
+Consider using a `virtualenv <http://python-guide-pt-br.readthedocs.io/en/latest/dev/virtualenvs/>`_ and `virtualenvwrapper <https://virtualenvwrapper.readthedocs.io/en/latest/>`_ to make dependency management easier and keep your global site-packages directory clean::
 
-	pip install -e git+https://github.com/INSERT GH USER NAME HERE/pyxform.git@master#egg=pyxform
+    pip install virtualenv
+    pip install virtualenvwrapper
+    mkvirtualenv local_pyxform                     # or whatever you want to name it
+    (local_pyxform)$ python setup.py develop       # install the local files
+    (local_pyxform)$ python pyxform/xls2xform.py --help
+    (local_pyxform)$ xls2xform --help              # same effect as previous line
+    (local_pyxform)$ which xls2xform.              # ~/.virtualenvs/local_pyxform/bin/xls2xform
+
+To leave and return to the virtual environment::
+
+    (local_pyxform)$ deactivate                    # leave the virtualenv
+    $ xls2xform --help 
+    # -bash: xls2xform: command not found
+    $ workon local_pyxform                         # reactivate the virtualenv
+    (local_pyxform)$ which xls2xform               # & we can access the scripts once again
+    ~/.virtualenvs/local_pyxform/bin/xls2xform
+
+Installing pyxform from remote source
+=====================================
+`pip` can install from any GitHub repository::
+
+	pip install git+https://github.com/XLSForm/pyxform.git@master#egg=pyxform
+
+You can then run xls2xform from the commandline::
+
+	xls2xform path_to_XLSForm output_path
 
 Testing
 =======
@@ -58,23 +84,6 @@ To check out the documentation for pyxform do the following::
 
 	make html
 
-Chage Log
+Change Log
 =========
-(since `v0.89
-<https://github.com/modilabs/pyxform/tree/39097db3da789fef9e33a6680df1e912dd29c5db>`_)
-
-- Added support for submission_url and public_key settings.
-- Added alternative syntax (\::) for grouping headers.
-- Added new example/test spreadsheets: (xlsform_spec_test.xls, calculate.xls, warnings.xls)
-- xls_to_dict in xls2json_backends.py now converts everything (including numbers and booleans) to trimmed unicode values.
-  (This solves the issue with labels not being able to be numbers).
-- Aliases added (see *_alias dictionaries in xls2json.py)
-- xls2json code can collect warnings into an array and print them to a file.
-- Some errors and warnings have row numbers
-- Merged jbeorse's base.xls with modilabs's base.xls into all.xls
-- Fixed translations for media and hints
-- Added media back in
-- Added table-lists
-- Automatic none option for select all that apply is off by default.
-- Adding json_form_schema.json to document the json format.
-  (Perhaps it could be used for validation or form generation at some point).
+`Changelog <CHANGES.txt>`_

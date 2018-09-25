@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:orx="http://openrosa.org/xforms/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:orx="http://openrosa.org/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <h:head>
     <h:title>Spec test</h:title>
     <model>
@@ -333,7 +333,7 @@
             <value>-</value>
           </text>
           <text id="/xlsform_spec_test/everything/repeat_test/group_test/select_multiple_test:jr:constraintMsg">
-            <value>對不起 <output value=" /xlsform_spec_test/everything/my_name "/>，你可以不選擇“是”和“否”。</value>
+            <value>對不起 <output value=" /xlsform_spec_test/everything/my_name "/>，你可以不選擇"是"和"否"。</value>
           </text>
           <text id="/xlsform_spec_test/everything/number_label:label">
             <value>-</value>
@@ -903,7 +903,6 @@
       </input>
       <input ref="/xlsform_spec_test/everything/geopoint_test">
         <label ref="jr:itext('/xlsform_spec_test/everything/geopoint_test:label')"/>
-        <hint>GPS coordinates can only be collected when outside.</hint>
       </input>
       <input ref="/xlsform_spec_test/everything/barcode_test">
         <label ref="jr:itext('/xlsform_spec_test/everything/barcode_test:label')"/>

@@ -21,3 +21,5 @@ env
 
 # ignore pypi manifest
 MANIFEST
+_workspace
+workspace

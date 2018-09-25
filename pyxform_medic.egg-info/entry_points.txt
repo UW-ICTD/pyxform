@@ -1,0 +1,3 @@
+[console_scripts]
+xls2xform-medic = pyxform.xls2xform:main_cli
+

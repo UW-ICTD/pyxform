@@ -1,22 +1,34 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
-    name='pyxform',
-    version='0.9.18',
-    author='modilabs',
-    author_email='info@modilabs.org',
-    packages=['pyxform', 'pyxform.odk_validate'],
-    package_dir={'pyxform': 'pyxform'},
+    name='pyxform-medic',
+    version='0.9.29',
+    author='github.com/xlsform',
+    author_email='info@xlsform.org',
+    packages=find_packages(),
     package_data={
-        'pyxform': [
-            'odk_validate/ODK_Validate.jar',
+        'pyxform.odk_validate': [
+            'ODK_Validate.jar',
         ],
+        'pyxform.tests': [
+            'example_xls/*.*',
+            'bug_example_xls/*.*',
+            'test_output/*.*',
+            'test_expected_output/*.*',
+        ]
     },
     url='http://pypi.python.org/pypi/pyxform/',
     description='A Python package to create XForms for ODK Collect.',
     long_description=open('README.rst', 'rt').read(),
     install_requires=[
-        'xlrd==0.8.0',
-        'lxml==2.3.4',
+        'xlrd==1.0.0',
+        'unicodecsv==0.14.1',
+        'formencode',
+        'unittest2',
     ],
+    entry_points={
+        'console_scripts': [
+            'xls2xform-medic=pyxform.xls2xform:main_cli',
+        ],
+    },
 )

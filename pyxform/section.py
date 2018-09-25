@@ -1,6 +1,6 @@
-from question import SurveyElement
-from utils import node
-from errors import PyXFormError
+from pyxform.question import SurveyElement
+from pyxform.utils import node
+from pyxform.errors import PyXFormError
 
 
 class Section(SurveyElement):
@@ -17,7 +17,8 @@ class Section(SurveyElement):
         for element in self.children:
             if element.name in element_slugs:
                 raise PyXFormError(
-                    "There are two survey elements named '%s' in the section named '%s'." % (element.name, self.name)
+                    "There are two survey elements named '%s' in the section"
+                    " named '%s'." % (element.name, self.name)
                     )
             element_slugs.append(element.name)
 
@@ -25,7 +26,17 @@ class Section(SurveyElement):
         """
         Creates an xml representation of the section
         """
-        result = node(self.name, **kwargs)
+        attributes = {}
+        attributes.update(kwargs)
+        attributes.update(self.get(u'instance', {}))
+        survey = self.get_root()
+        # Resolve field references in attributes
+        for key, value in attributes.items():
+            attributes[key] = survey.insert_xpaths(value)
+
+        if self.name == u"meta":
+            attributes[u"tag"] = u"hidden"
+        result = node(self.name, **attributes)
         for child in self.children:
             if child.get(u"flat"):
                 for grandchild in child.xml_instance_array():
@@ -34,7 +45,7 @@ class Section(SurveyElement):
                 result.appendChild(child.xml_instance())
         return result
 
-    def xml_instance_array(self, **kwargs):
+    def xml_instance_array(self):
         """
         This method is used for generating flat instances.
         """
@@ -48,10 +59,12 @@ class Section(SurveyElement):
     def xml_control(self):
         """
         Ideally, we'll have groups up and rolling soon, but for now
-        let's just return a list of controls from all the children of
-        this section.
+        let's just yield controls from all the children of this section
         """
-        return [e.xml_control() for e in self.children if e.xml_control() is not None]
+        for e in self.children:
+            control = e.xml_control()
+            if control is not None:
+                yield control
 
 
 class RepeatingSection(Section):
@@ -64,16 +77,16 @@ class RepeatingSection(Section):
             <label ref="jr:itext('fav')" />
             <item><label ref="jr:itext('red')" /><value>red</value></item>
             <item><label ref="jr:itext('green')" /><value>green</value></item>
-            <item><label ref="jr:itext('yellow')" /><value>yellow</value></item>
+            <item><label ref="jr:itext('blue')" /><value>blue</value></item>
           </select1>
         </repeat>
         </group>
         """
         control_dict = self.control.copy()
-        jrcount = control_dict.get('jr:count')
-        if jrcount:
-            survey = self.get_root()
-            control_dict['jr:count'] = survey.insert_xpaths(jrcount)
+        survey = self.get_root()
+        # Resolve field references in attributes
+        for key, value in control_dict.items():
+            control_dict[key] = survey.insert_xpaths(value)
         repeat_node = node(u"repeat", nodeset=self.get_xpath(), **control_dict)
 
         for n in Section.xml_control(self):
@@ -85,46 +98,68 @@ class RepeatingSection(Section):
                 u"group", self.xml_label(), repeat_node,
                 ref=self.get_xpath()
                 )
-        return node(u"group", repeat_node, ref=self.get_xpath())
+        return node(u"group", repeat_node, ref=self.get_xpath(),
+                    **self.control)
 
-    #I'm anal about matching function signatures when overriding a function, but there's no reason for kwargs to be an argument
+    # I'm anal about matching function signatures when overriding a function,
+    # but there's no reason for kwargs to be an argument
     def xml_instance(self, **kwargs):
-        kwargs = {"jr:template": ""} #It might make more sense to add this as a child on initialization
+        kwargs = {"jr:template": ""}  # It might make more sense to add this
+        #                               as a child on initialization
+
         return super(RepeatingSection, self).xml_instance(**kwargs)
 
+
 class GroupedSection(Section):
-#    I think this might be a better place for the table-list stuff, however it doesn't allow for as good of validation as putting it in xls2json
-#    def __init__(self, **kwargs):
-#        control = kwargs.get(u"control")
-#        if control:
-#            appearance = control.get(u"appearance")
-#            if appearance is u"table-list":
-#                print "HI"
-#                control[u"appearance"] = "field-list"
-#                kwargs["children"].insert(0, kwargs["children"][0])
-#        super(GroupedSection, self).__init__(kwargs)
-        
+    # I think this might be a better place for the table-list stuff, however it
+    # doesn't allow for as good of validation as putting it in xls2json
+    # def __init__(self, **kwargs):
+    #        control = kwargs.get(u"control")
+    #        if control:
+    #            appearance = control.get(u"appearance")
+    #            if appearance is u"table-list":
+    #                print "HI"
+    #                control[u"appearance"] = "field-list"
+    #                kwargs["children"].insert(0, kwargs["children"][0])
+    #        super(GroupedSection, self).__init__(kwargs)
+
     def xml_control(self):
         control_dict = self.control
-        
+
         if control_dict.get("bodyless"):
             return None
-            
+
         children = []
-        attrs = {}
-        
+        attributes = {}
+        attributes.update(self.control)
+
+        survey = self.get_root()
+
+        # Resolve field references in attributes
+        for key, value in attributes.items():
+            attributes[key] = survey.insert_xpaths(value)
+
         if not self.get('flat'):
-            attrs['ref'] = self.get_xpath()
-        
+            attributes['ref'] = self.get_xpath()
+
         if 'label' in self and len(self['label']) > 0:
-            children.append(self.xml_label())
+            if isinstance(self['label'], dict) and \
+                len([v for v in self['label'].values() if v != 'NO_LABEL']):
+               children.append(self.xml_label())
+            else:
+                children.append(self.xml_label())
+
         for n in Section.xml_control(self):
             children.append(n)
-        
+
         if u"appearance" in control_dict:
-            attrs['appearance'] = control_dict['appearance']
-        
-        return node(u"group", *children, **attrs)
+            attributes['appearance'] = control_dict['appearance']
+
+        if u"intent" in control_dict:
+            survey = self.get_root()
+            attributes['intent'] = survey.insert_xpaths(control_dict['intent'])
+
+        return node(u"group", *children, **attributes)
 
     def to_json_dict(self):
         # This is quite hacky, might want to think about a smart way
