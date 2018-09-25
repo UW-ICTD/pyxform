@@ -78,6 +78,9 @@ def node(*args, **kwargs):
     # kwargs is an xml attribute dictionary,
     # here we convert it to a xml.dom.minidom.Element
     for k, v in iter(kwargs.items()):
+        if k == u'tag' and v == tag:
+            continue
+
         if k == 'toParseString':
             if v is True and len(unicode_args) == 1:
                 parsed_string = True
